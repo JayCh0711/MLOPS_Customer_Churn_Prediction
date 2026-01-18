@@ -23,7 +23,7 @@ whylogs==1.3.3
 
 # Utilities
 python-dotenv==1.0.0
-PyYAML==6.0.1
+PyYAML==6.0.3
 joblib==1.3.2
 requests==2.31.0
 
