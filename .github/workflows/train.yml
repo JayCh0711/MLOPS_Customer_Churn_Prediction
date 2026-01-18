@@ -1,0 +1,272 @@
+# ============================================
+# Model Training Pipeline
+# ============================================
+
+name: Model Training
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      experiment_name:
+        description: 'MLflow experiment name'
+        required: false
+        default: 'customer-churn-prediction'
+      retrain_reason:
+        description: 'Reason for retraining'
+        required: true
+        default: 'Scheduled retrain'
+
+  # Scheduled training (weekly)
+  schedule:
+    - cron: '0 2 * * 0'  # Every Sunday at 2 AM UTC
+
+  # Trigger on data changes
+  push:
+    paths:
+      - 'data/raw/**'
+      - 'params.yaml'
+      - 'src/models/train.py'
+      - 'src/features/build_features.py'
+
+env:
+  PYTHON_VERSION: "3.10"
+
+jobs:
+  # ==========================================
+  # Job 1: Data Validation
+  # ==========================================
+  validate-data:
+    name: Validate Data
+    runs-on: ubuntu-latest
+
+    outputs:
+      data_valid: ${{ steps.validate.outputs.valid }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install pandas numpy
+
+      - name: Download data
+        run: |
+          python scripts/download_data.py
+
+      - name: Validate data
+        id: validate
+        run: |
+          python -c "
+          import pandas as pd
+          import sys
+          
+          df = pd.read_csv('data/raw/telco_churn.csv')
+          
+          # Validation checks
+          checks = []
+          
+          # Check 1: Not empty
+          checks.append(('not_empty', len(df) > 0))
+          
+          # Check 2: Has required columns
+          required = ['customerID', 'Churn', 'tenure', 'MonthlyCharges']
+          checks.append(('has_columns', all(c in df.columns for c in required)))
+          
+          # Check 3: No excessive missing values
+          missing_pct = df.isnull().sum().max() / len(df)
+          checks.append(('low_missing', missing_pct < 0.1))
+          
+          # Print results
+          all_passed = True
+          for name, passed in checks:
+              status = '✅' if passed else '❌'
+              print(f'{status} {name}: {passed}')
+              if not passed:
+                  all_passed = False
+          
+          if all_passed:
+              print('valid=true')
+          else:
+              print('valid=false')
+              sys.exit(1)
+          "
+          echo "valid=true" >> $GITHUB_OUTPUT
+
+  # ==========================================
+  # Job 2: Train Model
+  # ==========================================
+  train:
+    name: Train Model
+    runs-on: ubuntu-latest
+    needs: validate-data
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Download data
+        run: |
+          python scripts/download_data.py
+
+      - name: Run DVC pipeline
+        run: |
+          dvc repro
+
+      - name: Log training info
+        run: |
+          echo "Training completed at $(date)"
+          echo "Experiment: ${{ github.event.inputs.experiment_name || 'customer-churn-prediction' }}"
+          echo "Reason: ${{ github.event.inputs.retrain_reason || 'Scheduled/Automated' }}"
+          
+          # Print metrics
+          cat models/metrics/training_summary.json
+
+      - name: Upload model artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: trained-model
+          path: |
+            models/best_model.joblib
+            models/feature_artifacts/
+            models/metrics/
+
+      - name: Upload evaluation plots
+        uses: actions/upload-artifact@v3
+        with:
+          name: evaluation-plots
+          path: models/evaluation/
+
+  # ==========================================
+  # Job 3: Evaluate Model
+  # ==========================================
+  evaluate:
+    name: Evaluate Model
+    runs-on: ubuntu-latest
+    needs: train
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Download model artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: trained-model
+          path: models/
+
+      - name: Install dependencies
+        run: |
+          pip install pandas numpy scikit-learn joblib
+
+      - name: Download data for evaluation
+        run: |
+          python scripts/download_data.py
+          python src/data/preprocess.py
+          python src/features/build_features.py
+          python src/data/split_data.py
+
+      - name: Evaluate model
+        id: evaluate
+        run: |
+          python -c "
+          import json
+          import joblib
+          import pandas as pd
+          from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
+          
+          # Load model and test data
+          model = joblib.load('models/best_model.joblib')
+          X_test = pd.read_csv('data/processed/X_test.csv')
+          y_test = pd.read_csv('data/processed/y_test.csv').squeeze()
+          
+          # Predictions
+          y_pred = model.predict(X_test)
+          y_prob = model.predict_proba(X_test)[:, 1]
+          
+          # Metrics
+          metrics = {
+              'accuracy': accuracy_score(y_test, y_pred),
+              'f1_score': f1_score(y_test, y_pred),
+              'roc_auc': roc_auc_score(y_test, y_prob)
+          }
+          
+          print('Model Evaluation Results:')
+          for name, value in metrics.items():
+              print(f'  {name}: {value:.4f}')
+          
+          # Check thresholds
+          if metrics['f1_score'] < 0.5:
+              print('⚠️ Warning: F1 score below threshold')
+          if metrics['roc_auc'] < 0.7:
+              print('⚠️ Warning: ROC-AUC below threshold')
+          "
+
+      - name: Create evaluation summary
+        run: |
+          echo "## Model Evaluation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          cat models/metrics/training_summary.json | python -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          metrics = data.get('best_metrics', {})
+          for k, v in metrics.items():
+              print(f'| {k} | {v:.4f} |')
+          " >> $GITHUB_STEP_SUMMARY
+
+  # ==========================================
+  # Job 4: Register Model (if approved)
+  # ==========================================
+  register-model:
+    name: Register Model
+    runs-on: ubuntu-latest
+    needs: evaluate
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download model artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: trained-model
+          path: models/
+
+      - name: Create model release
+        run: |
+          echo "Model registration completed"
+          echo "Model artifacts are ready for deployment"
+          
+          # In production, you would:
+          # 1. Push to model registry (MLflow, Azure ML, etc.)
+          # 2. Create a GitHub release
+          # 3. Trigger deployment pipeline

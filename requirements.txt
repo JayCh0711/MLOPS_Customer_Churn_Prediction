@@ -12,7 +12,6 @@ dvc-gdrive==2.20.0
 fastapi==0.103.1
 uvicorn==0.23.2
 pydantic==2.4.2
-httpx==0.25.0
 
 # Testing
 pytest==7.4.2
@@ -31,3 +30,10 @@ requests==2.31.0
 # Visualization
 matplotlib==3.8.0
 seaborn==0.12.2
+
+# Development & CI (optional - for local development)
+black==23.9.1
+isort==5.12.0
+flake8==6.1.0
+bandit==1.7.5
+safety==2.3.5

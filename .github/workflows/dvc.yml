@@ -1,0 +1,64 @@
+# ============================================
+# DVC Pipeline Workflow
+# ============================================
+
+name: DVC Pipeline
+
+on:
+  push:
+    paths:
+      - 'dvc.yaml'
+      - 'params.yaml'
+      - 'src/**'
+    branches: [main, develop]
+  pull_request:
+    paths:
+      - 'dvc.yaml'
+      - 'params.yaml'
+      - 'src/**'
+
+jobs:
+  dvc-pipeline:
+    name: Run DVC Pipeline
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Setup DVC
+        uses: iterative/setup-dvc@v1
+
+      - name: Download data
+        run: |
+          python scripts/download_data.py
+
+      - name: Run DVC pipeline
+        run: |
+          dvc repro
+
+      - name: Show pipeline status
+        run: |
+          dvc status
+
+      - name: Show metrics
+        run: |
+          dvc metrics show
+
+      - name: Upload DVC artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dvc-artifacts
+          path: |
+            models/
+            data/processed/
+            dvc.lock
