@@ -1,0 +1,147 @@
+{
+  "timestamp": "2026-01-18T13:42:26.573784",
+  "reference_samples": 5634,
+  "current_samples": 1409,
+  "dataset_drift_detected": false,
+  "drift_share": 0.5,
+  "number_of_drifted_columns": 3,
+  "number_of_columns": 26,
+  "drifted_columns": [
+    "Partner",
+    "SeniorCitizen",
+    "gender"
+  ],
+  "column_drift_scores": {
+    "Contract": {
+      "drift_detected": false,
+      "drift_score": 0.004245378949476742,
+      "stattest_name": "Jensen-Shannon distance"
+    },
+    "Dependents": {
+      "drift_detected": false,
+      "drift_score": 0.006067351837104586,
+      "stattest_name": "Jensen-Shannon distance"
+    },
+    "DeviceProtection": {
+      "drift_detected": false,
+      "drift_score": 0.0074565662683688,
+      "stattest_name": "Jensen-Shannon distance"
+    },
+    "InternetService": {
+      "drift_detected": false,
+      "drift_score": 0.005428360008171106,
+      "stattest_name": "Jensen-Shannon distance"
+    },
+    "MonthlyCharges": {
+      "drift_detected": false,
+      "drift_score": 0.029297606881289337,
+      "stattest_name": "Wasserstein distance (normed)"
+    },
+    "MultipleLines": {
+      "drift_detected": false,
+      "drift_score": 0.019429240217282647,
+      "stattest_name": "Jensen-Shannon distance"
+    },
+    "OnlineBackup": {
+      "drift_detected": false,
+      "drift_score": 0.02353966314381713,
+      "stattest_name": "Jensen-Shannon distance"
+    },
+    "OnlineSecurity": {
+      "drift_detected": false,
+      "drift_score": 0.006499717282636422,
+      "stattest_name": "Jensen-Shannon distance"
+    },
+    "PaperlessBilling": {
+      "drift_detected": false,
+      "drift_score": 0.0035530125302844708,
+      "stattest_name": "Jensen-Shannon distance"
+    },
+    "Partner": {
+      "drift_detected": true,
+      "drift_score": 0.891404429316949,
+      "stattest_name": "Wasserstein distance (normed)"
+    },
+    "PaymentMethod": {
+      "drift_detected": false,
+      "drift_score": 0.00711029846957658,
+      "stattest_name": "Jensen-Shannon distance"
+    },
+    "PhoneService": {
+      "drift_detected": false,
+      "drift_score": 0.01450086051940199,
+      "stattest_name": "Jensen-Shannon distance"
+    },
+    "SeniorCitizen": {
+      "drift_detected": true,
+      "drift_score": 1.0979556782456101,
+      "stattest_name": "Wasserstein distance (normed)"
+    },
+    "StreamingMovies": {
+      "drift_detected": false,
+      "drift_score": 0.011334413371852812,
+      "stattest_name": "Jensen-Shannon distance"
+    },
+    "StreamingTV": {
+      "drift_detected": false,
+      "drift_score": 0.01868766786131169,
+      "stattest_name": "Jensen-Shannon distance"
+    },
+    "TechSupport": {
+      "drift_detected": false,
+      "drift_score": 0.009855082110201852,
+      "stattest_name": "Jensen-Shannon distance"
+    },
+    "TotalCharges": {
+      "drift_detected": false,
+      "drift_score": 0.04453008959104732,
+      "stattest_name": "Wasserstein distance (normed)"
+    },
+    "avg_monthly_spend": {
+      "drift_detected": false,
+      "drift_score": 0.029997042963295726,
+      "stattest_name": "Wasserstein distance (normed)"
+    },
+    "charges_per_tenure": {
+      "drift_detected": false,
+      "drift_score": 0.03193153494114775,
+      "stattest_name": "Wasserstein distance (normed)"
+    },
+    "contract_risk": {
+      "drift_detected": false,
+      "drift_score": 0.004245378949476742,
+      "stattest_name": "Jensen-Shannon distance"
+    },
+    "gender": {
+      "drift_detected": true,
+      "drift_score": 0.9626644544302264,
+      "stattest_name": "Wasserstein distance (normed)"
+    },
+    "has_family": {
+      "drift_detected": false,
+      "drift_score": 0.006169138156419804,
+      "stattest_name": "Jensen-Shannon distance"
+    },
+    "monthly_charges_group": {
+      "drift_detected": false,
+      "drift_score": 0.012275293518473104,
+      "stattest_name": "Jensen-Shannon distance"
+    },
+    "num_services": {
+      "drift_detected": false,
+      "drift_score": 0.04874297799372768,
+      "stattest_name": "Wasserstein distance (normed)"
+    },
+    "tenure": {
+      "drift_detected": false,
+      "drift_score": 0.024617831240879632,
+      "stattest_name": "Wasserstein distance (normed)"
+    },
+    "tenure_group": {
+      "drift_detected": false,
+      "drift_score": 0.018484349877170358,
+      "stattest_name": "Wasserstein distance (normed)"
+    }
+  },
+  "report_path": "monitoring/reports\\drift_report_20260118_191226.html"
+}

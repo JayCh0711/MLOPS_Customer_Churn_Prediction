@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-01-18T13:42:14.466116",
+  "metrics": {
+    "total_predictions": 100,
+    "predictions_by_hour": {
+      "2026-01-18 19:00": 100
+    },
+    "churn_predictions": 36,
+    "no_churn_predictions": 64,
+    "average_probability": 0.4272130051060573,
+    "high_risk_count": 13,
+    "low_risk_count": 40,
+    "churn_rate": 0.36,
+    "high_risk_rate": 0.13,
+    "low_risk_rate": 0.4
+  },
+  "recent_alerts": [],
+  "status": "healthy"
+}
