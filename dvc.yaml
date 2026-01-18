@@ -32,3 +32,41 @@ stages:
       - data/processed/X_test.csv
       - data/processed/y_train.csv
       - data/processed/y_test.csv
+
+  # Stage 4: Model Training
+  train:
+    cmd: python src/models/train.py
+    deps:
+      - src/models/train.py
+      - data/processed/X_train.csv
+      - data/processed/X_test.csv
+      - data/processed/y_train.csv
+      - data/processed/y_test.csv
+      - params.yaml
+    params:
+      - model.n_estimators
+      - model.max_depth
+      - model.min_samples_split
+      - model.min_samples_leaf
+    outs:
+      - models/best_model.joblib
+    metrics:
+      - models/metrics/training_summary.json:
+          cache: false
+
+  # Stage 5: Model Evaluation
+  evaluate:
+    cmd: python src/models/evaluate.py
+    deps:
+      - src/models/evaluate.py
+      - models/best_model.joblib
+      - data/processed/X_test.csv
+      - data/processed/y_test.csv
+    outs:
+      - models/evaluation/confusion_matrix.png
+      - models/evaluation/roc_curve.png
+      - models/evaluation/precision_recall_curve.png
+      - models/evaluation/feature_importance.png
+    metrics:
+      - models/evaluation/evaluation_report.json:
+          cache: false
