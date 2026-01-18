@@ -1,0 +1,7 @@
+# DVC Pipeline Configuration
+# We'll add stages in upcoming steps
+
+stages:
+  # Placeholder - will be filled in Step 4
+  prepare:
+    cmd: echo "Pipeline will be configured soon"

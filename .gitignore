@@ -18,6 +18,7 @@ data/raw/*
 data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+!data/raw/*.dvc
 
 # Models (will be tracked by DVC)
 models/*
