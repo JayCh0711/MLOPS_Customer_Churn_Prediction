@@ -11,7 +11,7 @@ dvc-gdrive==2.20.0
 # API
 fastapi==0.103.1
 uvicorn==0.23.2
-pydantic==2.4.2
+pydantic==1.10.26
 
 # Testing
 pytest==7.4.2
@@ -37,3 +37,7 @@ isort==5.12.0
 flake8==6.1.0
 bandit==1.7.5
 safety==2.3.5
+
+
+# Add to requirements.txt
+dvc-azure==2.23.0
