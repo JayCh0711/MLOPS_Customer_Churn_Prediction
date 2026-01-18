@@ -1,0 +1,21 @@
+# ============================================
+# Docker Compose Override - Development
+# ============================================
+
+version: '3.8'
+
+services:
+  api:
+    build:
+      target: dependencies  # Use dependencies stage for dev
+    volumes:
+      # Mount source code for hot reload
+      - ./api:/app/api
+      - ./src:/app/src
+      - ./models:/app/models
+      - ./data:/app/data
+      - ./config:/app/config
+    environment:
+      - ENVIRONMENT=development
+      - LOG_LEVEL=debug
+    command: ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

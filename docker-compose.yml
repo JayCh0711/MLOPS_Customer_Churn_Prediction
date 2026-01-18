@@ -1,0 +1,111 @@
+# ============================================
+# Docker Compose for MLOps Customer Churn
+# ============================================
+
+version: '3.8'
+
+services:
+  # ==========================================
+  # Main API Service
+  # ==========================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: churn-prediction-api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount models directory
+      - ./models:/app/models:ro
+      # Mount data directory (read-only for API)
+      - ./data:/app/data:ro
+      # Mount config
+      - ./config:/app/config:ro
+      # Logs volume
+      - api_logs:/app/logs
+    environment:
+      - ENVIRONMENT=production
+      - LOG_LEVEL=info
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - mlops-network
+
+  # ==========================================
+  # MLflow Tracking Server
+  # ==========================================
+  mlflow:
+    image: python:3.10-slim
+    container_name: mlflow-server
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlruns:/mlflow/mlruns
+      - mlflow_artifacts:/mlflow/artifacts
+    working_dir: /mlflow
+    command: >
+      bash -c "pip install mlflow &&
+               mlflow server 
+               --backend-store-uri sqlite:///mlflow.db 
+               --default-artifact-root /mlflow/artifacts 
+               --host 0.0.0.0 
+               --port 5000"
+    environment:
+      - MLFLOW_TRACKING_URI=http://localhost:5000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - mlops-network
+
+  # ==========================================
+  # Training Service (on-demand)
+  # ==========================================
+  trainer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: churn-trainer
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./mlruns:/app/mlruns
+      - ./src:/app/src
+    environment:
+      - ENVIRONMENT=training
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    command: ["python", "-m", "src.models.train"]
+    depends_on:
+      - mlflow
+    networks:
+      - mlops-network
+    profiles:
+      - training  # Only run when explicitly requested
+
+# ==========================================
+# Networks
+# ==========================================
+networks:
+  mlops-network:
+    driver: bridge
+
+# ==========================================
+# Volumes
+# ==========================================
+volumes:
+  api_logs:
+  mlflow_artifacts:
