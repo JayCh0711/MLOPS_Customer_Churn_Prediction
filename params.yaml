@@ -1,0 +1,29 @@
+# Pipeline Parameters
+
+# Data preprocessing parameters
+preprocess:
+  handle_outliers: true
+  outlier_method: 'iqr'
+  outlier_threshold: 1.5
+
+# Feature engineering parameters
+features:
+  create_tenure_groups: true
+  create_charges_groups: true
+  create_service_count: true
+  scale_numerical: true
+  encode_categorical: true
+
+# Data split parameters
+split:
+  test_size: 0.2
+  random_state: 42
+  stratify: true
+
+# Model parameters (for next step)
+model:
+  algorithm: 'random_forest'
+  n_estimators: 100
+  max_depth: 10
+  min_samples_split: 5
+  min_samples_leaf: 2

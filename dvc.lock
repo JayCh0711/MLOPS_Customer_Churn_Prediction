@@ -1,0 +1,71 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: python src/data/preprocess.py
+    deps:
+    - path: data/raw/telco_churn.csv
+      hash: md5
+      md5: 3b0bfab28a8101b4e4fdd08025a5c235
+      size: 970457
+    - path: src/data/preprocess.py
+      hash: md5
+      md5: 84006fc70880e775b796f4a17d033292
+      size: 5945
+    outs:
+    - path: data/processed/cleaned_data.csv
+      hash: md5
+      md5: efe96b361736c7f15fdf94a6b2c0f8b8
+      size: 900744
+  featurize:
+    cmd: python src/features/build_features.py
+    deps:
+    - path: data/processed/cleaned_data.csv
+      hash: md5
+      md5: efe96b361736c7f15fdf94a6b2c0f8b8
+      size: 900744
+    - path: src/features/build_features.py
+      hash: md5
+      md5: dbac0ae536be23bac2a5ecdf317c6e14
+      size: 10256
+    outs:
+    - path: data/processed/featured_data.csv
+      hash: md5
+      md5: 924bdc1be4a076398b54d0bcaabe01d5
+      size: 1253481
+    - path: models/feature_artifacts
+      hash: md5
+      md5: e11519a5a06ed781b00522a7b1a212e7.dir
+      size: 8226
+      nfiles: 3
+  split:
+    cmd: python src/data/split_data.py
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: 5b67f6001174ddb9ad21b81c5d6d7443
+      size: 894
+    - path: data/processed/featured_data.csv
+      hash: md5
+      md5: 924bdc1be4a076398b54d0bcaabe01d5
+      size: 1253481
+    - path: src/data/split_data.py
+      hash: md5
+      md5: bd330c0d835538ef542acff82d9046e2
+      size: 3757
+    outs:
+    - path: data/processed/X_test.csv
+      hash: md5
+      md5: 2d1074d224573ea4b4f5b0aad88f5e08
+      size: 246106
+    - path: data/processed/X_train.csv
+      hash: md5
+      md5: 73f48f9dedf15598f0d3d6c2d561cdc2
+      size: 982653
+    - path: data/processed/y_test.csv
+      hash: md5
+      md5: e958151f165f7f472b725188c9e97a20
+      size: 4234
+    - path: data/processed/y_train.csv
+      hash: md5
+      md5: f597c5156799e0428077438ebc926949
+      size: 16909

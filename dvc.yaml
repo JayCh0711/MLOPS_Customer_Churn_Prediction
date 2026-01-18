@@ -1,7 +1,34 @@
 # DVC Pipeline Configuration
-# We'll add stages in upcoming steps
 
 stages:
-  # Placeholder - will be filled in Step 4
-  prepare:
-    cmd: echo "Pipeline will be configured soon"
+  # Stage 1: Data Preprocessing
+  preprocess:
+    cmd: python src/data/preprocess.py
+    deps:
+      - src/data/preprocess.py
+      - data/raw/telco_churn.csv
+    outs:
+      - data/processed/cleaned_data.csv
+
+  # Stage 2: Feature Engineering
+  featurize:
+    cmd: python src/features/build_features.py
+    deps:
+      - src/features/build_features.py
+      - data/processed/cleaned_data.csv
+    outs:
+      - data/processed/featured_data.csv
+      - models/feature_artifacts
+
+  # Stage 3: Data Splitting
+  split:
+    cmd: python src/data/split_data.py
+    deps:
+      - src/data/split_data.py
+      - data/processed/featured_data.csv
+      - config/config.yaml
+    outs:
+      - data/processed/X_train.csv
+      - data/processed/X_test.csv
+      - data/processed/y_train.csv
+      - data/processed/y_test.csv
