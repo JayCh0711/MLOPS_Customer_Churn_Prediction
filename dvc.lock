@@ -69,3 +69,85 @@ stages:
       hash: md5
       md5: f597c5156799e0428077438ebc926949
       size: 16909
+  train:
+    cmd: python src/models/train.py
+    deps:
+    - path: data/processed/X_test.csv
+      hash: md5
+      md5: 2d1074d224573ea4b4f5b0aad88f5e08
+      size: 246106
+    - path: data/processed/X_train.csv
+      hash: md5
+      md5: 73f48f9dedf15598f0d3d6c2d561cdc2
+      size: 982653
+    - path: data/processed/y_test.csv
+      hash: md5
+      md5: e958151f165f7f472b725188c9e97a20
+      size: 4234
+    - path: data/processed/y_train.csv
+      hash: md5
+      md5: f597c5156799e0428077438ebc926949
+      size: 16909
+    - path: params.yaml
+      hash: md5
+      md5: dd91f249cb05161a04f4547786e19657
+      size: 588
+    - path: src/models/train.py
+      hash: md5
+      md5: 2ad20d4264658755d72ef12cb5a06bb5
+      size: 14987
+    params:
+      params.yaml:
+        model.max_depth: 10
+        model.min_samples_leaf: 2
+        model.min_samples_split: 5
+        model.n_estimators: 100
+    outs:
+    - path: models/best_model.joblib
+      hash: md5
+      md5: 8a7670f22bc3ceda0904870795a67bae
+      size: 1871
+    - path: models/metrics/training_summary.json
+      hash: md5
+      md5: 24ae160e3bbeac8c4bda399a90f8b205
+      size: 3041
+  evaluate:
+    cmd: python src/models/evaluate.py
+    deps:
+    - path: data/processed/X_test.csv
+      hash: md5
+      md5: 2d1074d224573ea4b4f5b0aad88f5e08
+      size: 246106
+    - path: data/processed/y_test.csv
+      hash: md5
+      md5: e958151f165f7f472b725188c9e97a20
+      size: 4234
+    - path: models/best_model.joblib
+      hash: md5
+      md5: 8a7670f22bc3ceda0904870795a67bae
+      size: 1871
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: 563a54db6e3329cb091ee1d626c1cb15
+      size: 9604
+    outs:
+    - path: models/evaluation/confusion_matrix.png
+      hash: md5
+      md5: 96230501c757218b0725f28036e4dd8f
+      size: 82471
+    - path: models/evaluation/evaluation_report.json
+      hash: md5
+      md5: 470c96b968806a685d57dfe5caa4620c
+      size: 876
+    - path: models/evaluation/feature_importance.png
+      hash: md5
+      md5: cb397f59d1a7b1ad0071c5be1e288f76
+      size: 67631
+    - path: models/evaluation/precision_recall_curve.png
+      hash: md5
+      md5: 70d35e1edaf5727ac67d770ae24213f9
+      size: 96033
+    - path: models/evaluation/roc_curve.png
+      hash: md5
+      md5: 4df0497e4d4b5918ab2fbca75871af0f
+      size: 153132
